@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -7,6 +7,29 @@ import { registerSchema, RegisterFormValues } from '../../schemas/registerSchema
 import { authService } from '../../services/authService';
 import { InputField } from '../ui/InputField';
 import { ErrorBanner } from '../ui/ErrorBanner';
+
+// Custom resolver that runs Zod AND always checks password equality
+const registerResolver: Resolver<RegisterFormValues> = async (values, context, options) => {
+    const zodResult = await zodResolver(registerSchema)(values, context, options);
+    // Always run password match check independently of other field errors
+    if (
+        values.password &&
+        values.confirmPassword &&
+        values.password !== values.confirmPassword
+    ) {
+        return {
+            ...zodResult,
+            errors: {
+                ...zodResult.errors,
+                confirmPassword: {
+                    type: 'manual',
+                    message: 'Las contraseñas no coinciden',
+                },
+            },
+        };
+    }
+    return zodResult;
+};
 
 export const RegisterForm: React.FC = () => {
     const [serverError, setServerError] = useState<string>('');
@@ -16,9 +39,10 @@ export const RegisterForm: React.FC = () => {
         register,
         handleSubmit,
         control,
+        watch,
         formState: { errors, isSubmitting },
     } = useForm<RegisterFormValues>({
-        resolver: zodResolver(registerSchema),
+        resolver: registerResolver,
         mode: 'onSubmit', // Validate on submit as mostly preferred for long forms empty check
     });
 
@@ -110,8 +134,9 @@ export const RegisterForm: React.FC = () => {
                     />
 
                     <div className="flex flex-col gap-1 w-full">
-                        <label className="text-sm font-medium text-slate-700">Industria</label>
+                        <label htmlFor="field-industry" className="text-sm font-medium text-slate-700">Industria</label>
                         <select
+                            id="field-industry"
                             {...register('industry')}
                             className={`w-full h-11 px-3 py-2 rounded-xl border ${errors.industry ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500'
                                 } outline-none transition-colors shadow-sm text-slate-900 bg-white`}

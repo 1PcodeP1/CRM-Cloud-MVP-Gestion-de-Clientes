@@ -57,6 +57,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT
@@ -73,6 +74,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT
@@ -98,6 +100,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT
@@ -117,6 +120,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT
@@ -138,6 +142,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT
@@ -154,6 +159,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT — intentar acceder directamente a /settings (una ruta conocida)
@@ -170,6 +176,7 @@ describe('ProtectedRoute', () => {
                 isAuthenticated: false,
                 token: null,
                 user: null,
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT — intentar acceder directamente a /customers
@@ -198,6 +205,7 @@ describe('ProtectedRoute', () => {
                     lastName: 'Pérez',
                     company: 'ACME Corp',
                 },
+                checkSessionExpiration: vi.fn(),
             });
 
             // ACT

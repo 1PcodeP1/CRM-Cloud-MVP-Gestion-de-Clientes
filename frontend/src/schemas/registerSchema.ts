@@ -19,9 +19,14 @@ export const registerSchema = z.object({
         .max(255, 'Máximo 255 caracteres')
         .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 'La contraseña debe tener al menos 1 letra y 1 número'),
     confirmPassword: z.string().min(1, 'Este campo es obligatorio')
-}).refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword']
+}).superRefine((data, ctx) => {
+    if (data.password && data.confirmPassword && data.password !== data.confirmPassword) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Las contraseñas no coinciden',
+            path: ['confirmPassword'],
+        });
+    }
 });
 
 export type RegisterFormValues = z.infer<typeof registerSchema>;

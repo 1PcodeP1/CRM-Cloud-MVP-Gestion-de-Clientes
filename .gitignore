@@ -54,3 +54,6 @@ docker-compose.override.yml
 *.tgz
 *.pid
 *.seed
+
+# ─── Reportes de Sprint (locales, no rastrear) ────────────
+SPRINT*-REPORT.md
