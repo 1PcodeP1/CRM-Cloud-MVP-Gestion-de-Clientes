@@ -1,13 +1,26 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useEffect } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 export const ProtectedRoute: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+  const { isAuthenticated, checkSessionExpiration } = useAuth();
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace state={{ message: 'Debes iniciar sesión para acceder a esta página' }} />;
+  // Verificar expiración de sesión en cada renderizado
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkSessionExpiration();
     }
+  }, [isAuthenticated, checkSessionExpiration]);
 
-    return <Outlet />;
+  if (!isAuthenticated) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ message: "Debes iniciar sesión para acceder a esta sección" }}
+      />
+    );
+  }
+
+  return <Outlet />;
 };
