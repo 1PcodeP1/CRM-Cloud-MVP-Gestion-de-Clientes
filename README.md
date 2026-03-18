@@ -6,12 +6,12 @@ Sistema de gestión de relaciones con clientes (CRM) desarrollado con **React + 
 
 ## 🚀 Tecnologías
 
-| Capa | Stack |
-|------|-------|
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, React Router DOM, React Hook Form, Zod, Axios, Lucide React |
-| **Backend** | NestJS, TypeScript, TypeORM, PostgreSQL, Passport.js, JWT, bcryptjs, class-validator |
-| **Infraestructura** | Docker, Docker Compose |
-| **Testing** | Jest, Supertest (backend) · Vitest, Testing Library, MSW (frontend) |
+| Capa                | Stack                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Frontend**        | React 18, TypeScript, Vite, Tailwind CSS, React Router DOM, React Hook Form, Zod, Axios, Lucide React |
+| **Backend**         | NestJS, TypeScript, TypeORM, PostgreSQL, Passport.js, JWT, bcryptjs, class-validator                  |
+| **Infraestructura** | Docker, Docker Compose                                                                                |
+| **Testing**         | Jest, Supertest (backend) · Vitest, Testing Library, MSW (frontend)                                   |
 
 ---
 
@@ -27,36 +27,38 @@ Sistema de gestión de relaciones con clientes (CRM) desarrollado con **React + 
 1. Clona el repositorio y entra a la carpeta del proyecto.
 
 2. Copia el archivo de variables de entorno:
+
    ```bash
    cp .env.example .env
    ```
 
 3. Levanta toda la aplicación con un solo comando:
+
    ```bash
    docker compose up --build -d
    ```
 
 4. Accede a los servicios:
 
-   | Servicio | URL |
-   |----------|-----|
-   | 🌐 Frontend | [http://localhost:5173](http://localhost:5173) |
+   | Servicio       | URL                                            |
+   | -------------- | ---------------------------------------------- |
+   | 🌐 Frontend    | [http://localhost:5173](http://localhost:5173) |
    | ⚙️ Backend API | [http://localhost:3000](http://localhost:3000) |
-   | 🗄️ PostgreSQL | `localhost:5432` (usuario: `postgres`) |
+   | 🗄️ PostgreSQL  | `localhost:5432` (usuario: `postgres`)         |
 
 ---
 
 ## 🐳 Comandos Docker
 
-| Comando | Descripción |
-|---------|-------------|
-| `docker compose up --build -d` | Construir imágenes y levantar todos los servicios |
-| `docker compose up -d` | Levantar servicios (sin reconstruir imágenes) |
-| `docker compose down` | Detener y eliminar contenedores |
-| `docker compose down -v` | Detener, eliminar contenedores **y volúmenes** (borra la BD) |
-| `docker compose logs -f` | Ver logs de todos los servicios en tiempo real |
-| `docker compose logs -f backend` | Ver logs solo del backend |
-| `docker compose restart backend` | Reiniciar solo el backend |
+| Comando                          | Descripción                                                  |
+| -------------------------------- | ------------------------------------------------------------ |
+| `docker compose up --build -d`   | Construir imágenes y levantar todos los servicios            |
+| `docker compose up -d`           | Levantar servicios (sin reconstruir imágenes)                |
+| `docker compose down`            | Detener y eliminar contenedores                              |
+| `docker compose down -v`         | Detener, eliminar contenedores **y volúmenes** (borra la BD) |
+| `docker compose logs -f`         | Ver logs de todos los servicios en tiempo real               |
+| `docker compose logs -f backend` | Ver logs solo del backend                                    |
+| `docker compose restart backend` | Reiniciar solo el backend                                    |
 
 > **💡 Tip:** Después de hacer cambios en el código, ejecuta `docker compose up --build -d` para reconstruir y aplicar los cambios.
 
@@ -127,6 +129,7 @@ Tic2/
 │   └── package.json
 ├── docker-compose.yml         # Orquestador Docker
 ├── .env                       # Variables de entorno
+├── AGENTS.md                  # Guía para agentes de IA
 └── README.md
 ```
 
@@ -137,7 +140,7 @@ Tic2/
 Se implementó un flujo completo de autenticación con las siguientes características:
 
 - **Registro** con validación de campos (nombre, email, teléfono, contraseña)
-- **Login** con JWT almacenado en memoria (no localStorage)
+- **Login** con JWT almacenado en `localStorage` (`crm_token`, `crm_user`, `crm_timestamp`)
 - **Contraseñas** encriptadas con bcrypt (salt rounds: 10)
 - **Emails** normalizados a minúsculas automáticamente
 - **Sesión** con expiración de 24 horas
@@ -150,6 +153,7 @@ docker exec -it crm_postgres psql -U postgres -d crm_cloud
 ```
 
 Consultas útiles:
+
 ```sql
 SELECT id, first_name, last_name, email, company FROM users;
 ```
@@ -158,4 +162,4 @@ SELECT id, first_name, last_name, email, company FROM users;
 
 ## 👥 Autores
 
-Proyecto desarrollado como parte del módulo CRM Cloud — Sprint 1.
+Proyecto desarrollado como parte del módulo CRM Cloud — Sprint 2.
