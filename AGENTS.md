@@ -130,7 +130,7 @@ JWT_EXPIRES_IN=24h
 ```bash
 cd CRM-Cloud-MVP-Gestion-de-Clientes/backend
 npm install          # solo la primera vez
-npx jest --verbose
+npm test
 ```
 
 Resultado esperado: **22/22 PASS**
