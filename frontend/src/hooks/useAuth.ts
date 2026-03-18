@@ -51,6 +51,7 @@ export const useAuth = () => {
         notifyListeners();
     };
 
+    //El JWT es eliminado del almacenamiento del navegador (localStorage) y el estado de autenticación se restablece. Luego, el usuario es redirigido a la página de inicio de sesión con un mensaje opcional.
     const logout = (message?: string, isSuccess: boolean = false) => {
         globalUser = null;
         globalToken = null;

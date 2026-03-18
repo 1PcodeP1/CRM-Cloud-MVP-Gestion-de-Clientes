@@ -14,12 +14,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: { sub: string; email: string }) {
-        // This payload is automatically extracted and validated by passport-jwt
+        
         const user = await this.usersService.findByEmail(payload.email);
         if (!user) {
             throw new UnauthorizedException('Tu sesión ha expirado. Por favor ingresa de nuevo');
         }
-        // We attach the user to the request object
+        
         return { id: payload.sub, email: payload.email };
     }
 }

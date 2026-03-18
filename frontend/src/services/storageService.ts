@@ -40,7 +40,7 @@ export const storageService = {
             return { token: null, user: null, isExpired: false };
         }
     },
-
+    
     clearAuth(): void {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);

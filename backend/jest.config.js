@@ -4,7 +4,7 @@ module.exports = {
     rootDir: '.',
     testMatch: ['<rootDir>/src/**/*.spec.ts'],
     transform: {
-        '^.+\\.(t|j)s$': '<rootDir>/node_modules/ts-jest',
+        '^.+\\.(t|j)s$': 'ts-jest',
     },
     collectCoverageFrom: ['**/*.(t|j)s'],
     coverageDirectory: '../coverage',
