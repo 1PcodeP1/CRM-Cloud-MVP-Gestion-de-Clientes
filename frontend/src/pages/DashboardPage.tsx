@@ -1,20 +1,48 @@
 // frontend/src/pages/DashboardPage.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { Users, UserCheck, UserX, TrendingUp } from "lucide-react";
+import { clientService } from "../services/clientService";
 
 export const DashboardPage: React.FC = () => {
-  // Datos de ejemplo (en el futuro vendrán de la API)
-  const stats = {
-    total: 10,
-    active: 7,
-    prospects: 2,
-    inactive: 1,
-  };
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    prospects: 0,
+    inactive: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const [totalRes, activeRes, prospectRes, inactiveRes] = await Promise.all([
+          clientService.getClients({ limit: 1 }),
+          clientService.getClients({ limit: 1, status: 'Activo' }),
+          clientService.getClients({ limit: 1, status: 'Prospecto' }),
+          clientService.getClients({ limit: 1, status: 'Inactivo' }),
+        ]);
+
+        setStats({
+          total: totalRes.meta.total,
+          active: activeRes.meta.total,
+          prospects: prospectRes.meta.total,
+          inactive: inactiveRes.meta.total,
+        });
+      } catch (error) {
+        console.error("Error loading dashboard stats", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const KpiCard: React.FC<{
     label: string;
-    value: number;
+    value: number | string;
     sub: string;
     icon: React.ElementType;
     dark?: boolean;
@@ -43,7 +71,7 @@ export const DashboardPage: React.FC = () => {
               strokeWidth={1.8}
             />
           </div>
-          {pct !== undefined && (
+          {pct !== undefined && !loading && stats.total > 0 && (
             <span
               className="text-[11px] px-2.5 py-1 rounded-full font-semibold mono"
               style={{
@@ -68,7 +96,7 @@ export const DashboardPage: React.FC = () => {
             className="text-[44px] font-bold tracking-tight leading-none mb-2"
             style={{ color: color || (dark ? "#f1f5f9" : "#111827") }}
           >
-            {value}
+            {loading ? "..." : value}
           </p>
           <p
             className="text-[11px]"
@@ -109,7 +137,7 @@ export const DashboardPage: React.FC = () => {
           sub="En seguimiento"
           icon={UserCheck}
           color="#16a34a"
-          pct={Math.round((stats.active / stats.total) * 100)}
+          pct={Math.round((stats.active / (stats.total || 1)) * 100)}
         />
         <KpiCard
           label="Prospectos"
@@ -117,7 +145,7 @@ export const DashboardPage: React.FC = () => {
           sub="Por convertir"
           icon={TrendingUp}
           color="#d97706"
-          pct={Math.round((stats.prospects / stats.total) * 100)}
+          pct={Math.round((stats.prospects / (stats.total || 1)) * 100)}
         />
         <KpiCard
           label="Inactivos"
@@ -125,7 +153,7 @@ export const DashboardPage: React.FC = () => {
           sub="Sin actividad reciente"
           icon={UserX}
           color="#94a3b8"
-          pct={Math.round((stats.inactive / stats.total) * 100)}
+          pct={Math.round((stats.inactive / (stats.total || 1)) * 100)}
         />
       </div>
 
