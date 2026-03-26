@@ -23,18 +23,15 @@
 
 ---
 
-### HU-07 y HU-08: Visualización, Edición y Eliminación (CRUD)
+### HU-07: Visualización de Clientes
 
 **✅ Implementado completamente**
 
 **Criterios cumplidos:**
 
 - [x] Tabla interactiva o listado de clientes en el frontend
-- [x] Botones de acción para cada cliente (Editar, Eliminar)
 - [x] Protección de datos: Cada usuario solo ve sus propios clientes
-- [x] Eliminación en la base de datos protegiendo accesos no autorizados
-- [x] Notificaciones visuales tras las operaciones exitosas
-
+- [x] Peticiones seguras comprobando la pertenencia al usuario actual
 **Archivos modificados/creados:**
 
 - `frontend/src/pages/clients/ClientsPage.tsx` (NUEVO)
@@ -54,7 +51,6 @@ Página principal de gestión que proporciona:
 
 - Listado centralizado de clientes en formato de tabla/tarjetas
 - Conexión con `clientService` para obtención de datos
-- Interfaz para disparar la eliminación de registros
 - Rutas dinámicas para la navegación fluida
 
 ### 2. CreateClientPage
@@ -98,14 +94,6 @@ Usuario entra a /clients → Petición GET /clients (con JWT adjunto) →
 Backend filtra `WHERE userId = usuarioAutenticado.id` → Frontend renderiza la tabla
 ```
 
-### 3. Eliminación de cliente
-
-```text
-Usuario hace clic en "Eliminar" → Petición DELETE /clients/:id → 
-Backend verifica pertenencia (el cliente debe ser del usuario) → 
-Cliente eliminado → Refresco automático de la interfaz
-```
-
 ---
 
 ## Pruebas recomendadas
@@ -127,11 +115,6 @@ Cliente eliminado → Refresco automático de la interfaz
 2. Cerrar sesión e iniciar usando otro usuario distinto.
 3. Navegar a `/clients`.
 **Resultado esperado:** ✅ La lista debe estar vacía (las cuentas no pueden ver los clientes de la competencia).
-
-### Prueba 4: Eliminación segura
-1. Estando en la lista `/clients`, presionar el botón eliminar de uno existente.
-2. Corroborar desaparición.
-**Resultado esperado:** ✅ El cliente ya no figura en la grilla.
 
 ---
 
@@ -162,6 +145,7 @@ Cliente eliminado → Refresco automático de la interfaz
 
 ## Próximos pasos (Sprint 4)
 
+- HU-08: Edición y Eliminación de Clientes
 - Implementar barra de búsqueda para grandes carteras de clientes
 - Creación de filtros avanzados
 - Paginación (HU-09 - HU-10)
@@ -178,4 +162,3 @@ Cliente eliminado → Refresco automático de la interfaz
 ### Integridad Referencial
 
 - Relación estricta de base de datos *ManyToOne* (Muchos clientes pertenecen a Un usuario).
-- Borrado en cascada (Cascade Delete) garantizado desde las entidades.
