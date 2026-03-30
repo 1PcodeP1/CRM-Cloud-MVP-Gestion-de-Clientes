@@ -45,4 +45,29 @@ export const clientService = {
       throw new Error('No fue posible crear el cliente. Por favor intenta de nuevo más tarde');
     }
   },
+
+  async getClientById(id: string): Promise<Client> {
+    try {
+      const response = await api.get<Client>(`/clients/${id}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        throw new Error('Este cliente no existe');
+      }
+      throw new Error('No fue posible cargar la información del cliente');
+    }
+  },
+
+  async updateClient(id: string, data: Partial<CreateClientData>): Promise<Client> {
+    try {
+      const response = await api.put<Client>(`/clients/${id}`, data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        const msg = error.response.data.message;
+        throw new Error(Array.isArray(msg) ? msg[0] : msg);
+      }
+      throw new Error('No fue posible guardar los cambios. Por favor intenta de nuevo');
+    }
+  },
 };

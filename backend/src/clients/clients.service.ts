@@ -1,8 +1,9 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, ILike } from 'typeorm';
 import { Client, ClientStatus } from './entities/client.entity';
 import { CreateClientDto } from './dto/create-client.dto';
+import { UpdateClientDto } from './dto/update-client.dto';
 
 @Injectable()
 export class ClientsService {
@@ -62,5 +63,37 @@ export class ClientsService {
         lastPage: Math.ceil(total / limit),
       },
     };
+  }
+
+  async findOne(id: string): Promise<Client> {
+    const client = await this.clientRepository.findOne({ where: { id } });
+    if (!client) {
+      throw new NotFoundException('Cliente no encontrado');
+    }
+    return client;
+  }
+
+  async update(id: string, updateClientDto: UpdateClientDto): Promise<Client> {
+    const client = await this.findOne(id);
+
+    if (updateClientDto.email && updateClientDto.email !== client.email) {
+      const existingEmail = await this.clientRepository.findOne({
+        where: { email: updateClientDto.email },
+      });
+      if (existingEmail) {
+        throw new ConflictException('Ya existe un cliente registrado con este correo');
+      }
+    }
+
+    Object.assign(client, updateClientDto);
+
+    try {
+      return await this.clientRepository.save(client);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException('Ya existe un cliente registrado con este correo');
+      }
+      throw new InternalServerErrorException('Error al actualizar el cliente');
+    }
   }
 }
