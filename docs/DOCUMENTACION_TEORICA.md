@@ -51,7 +51,7 @@ Se implementa una estructura de dominio integral para el ecosistema relacional d
 - **Flujo de Operación**:
   - **Create**: Controladores que exigen DTOs rellenables vía Formularios Frontend y persistidos con relación uno a muchos.
   - **Read**: Recuperación masiva (listado general) o granular (búsqueda).
-  - **Update / Delete**: Mutaciones y eliminación de datos bajo rigor de autenticidad donde un usuario no puede manipular la fila de `Client` que pertenece a otro `User`.
+  - **Update / Delete**: Mutaciones y eliminación de datos bajo rigor de autenticidad donde un usuario no puede manipular la fila de `Client` que pertenece a otro `User`. La actualización se implementa con validaciones de interfaz `isDirty` garantizando la prevención de pérdida accidental de datos en los formularios (React Hook Form) y un DTO parcial protegido (`UpdateClientDto`) en el servidor.
 
 ## 7. Estrategias de Aseguramiento de Calidad (Testing)
 El código de producción se rige por su correlación con suites completas de pruebas automatizadas:
