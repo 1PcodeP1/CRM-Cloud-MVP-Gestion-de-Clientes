@@ -154,7 +154,11 @@ export const ClientsPage: React.FC = () => {
                   </tr>
                 ) : clients.length > 0 ? (
                   clients.map((client) => (
-                    <tr key={client.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr 
+                      key={client.id} 
+                      onClick={() => navigate(`/clients/${client.id}`)}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer"
+                    >
                       <td className="px-6 py-4">
                         <span className="text-sm font-medium text-slate-800">
                           {client.firstName} {client.lastName}

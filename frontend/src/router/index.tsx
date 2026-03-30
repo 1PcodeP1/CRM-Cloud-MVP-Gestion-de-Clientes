@@ -5,6 +5,8 @@ import { RegisterPage } from "../pages/RegisterPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { ClientsPage } from "../pages/clients/ClientsPage";
 import { CreateClientPage } from "../pages/clients/CreateClientPage";
+import { ClientDetailPage } from "../pages/clients/ClientDetailPage";
+import { EditClientPage } from "../pages/clients/EditClientPage";
 import { ProtectedRoute } from "../components/router/ProtectedRoute";
 import { PublicRoute } from "../components/router/PublicRoute";
 
@@ -40,6 +42,14 @@ export const router = createBrowserRouter([
       {
         path: "/clients/new",
         element: <CreateClientPage />,
+      },
+      {
+        path: "/clients/:id",
+        element: <ClientDetailPage />,
+      },
+      {
+        path: "/clients/:id/edit",
+        element: <EditClientPage />,
       },
     ],
   },
