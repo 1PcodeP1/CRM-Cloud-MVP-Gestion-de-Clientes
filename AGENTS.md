@@ -196,8 +196,8 @@ Resultado esperado: **30/30 PASS**
 |---|---|---|---|
 | Sprint 1 | EP-01 | HU-01 (Registro empresa), HU-02 (Confirmación visual) | Completado |
 | Sprint 2 | EP-02 | HU-03 (Login), HU-04 (Rutas protegidas), HU-05 (Logout) | Completado |
-| Sprint 3 | EP-03 | HU-06–HU-08 (CRUD clientes) | Pendiente |
-| Sprint 4 | EP-03 | HU-09–HU-10 (Búsqueda y filtros) | Pendiente |
+| Sprint 3 | EP-03 | HU-06–HU-08 (CRUD clientes) | Completado |
+| Sprint 4 | EP-03 | HU-09–HU-10 (Búsqueda y filtros) | Completado |
 | Sprint 5 | EP-04 | HU-11–HU-13 (Dashboard métricas) | Pendiente |
 | Sprint 6 | EP-05 | HU-14–HU-16 (Seguridad/encriptación) | Pendiente |
 
