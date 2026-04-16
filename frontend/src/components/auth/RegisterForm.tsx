@@ -17,15 +17,17 @@ const registerResolver: Resolver<RegisterFormValues> = async (values, context, o
         values.confirmPassword &&
         values.password !== values.confirmPassword
     ) {
+        const resolverError = 'errors' in zodResult ? zodResult.errors : {};
+
         return {
-            ...zodResult,
             errors: {
-                ...zodResult.errors,
+                ...resolverError,
                 confirmPassword: {
                     type: 'manual',
                     message: 'Las contraseñas no coinciden',
                 },
             },
+            values: {},
         };
     }
     return zodResult;
@@ -39,7 +41,6 @@ export const RegisterForm: React.FC = () => {
         register,
         handleSubmit,
         control,
-        watch,
         formState: { errors, isSubmitting },
     } = useForm<RegisterFormValues>({
         resolver: registerResolver,
@@ -49,7 +50,7 @@ export const RegisterForm: React.FC = () => {
     const onSubmit = async (data: RegisterFormValues) => {
         try {
             setServerError('');
-            const response = await authService.register(data);
+            await authService.register(data);
             // history.replace equivalent in react-router v6:
             navigate('/login', {
                 replace: true,

@@ -5,7 +5,7 @@ import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
 import { SuccessBanner } from '../../components/ui/SuccessBanner';
 import { clientService } from '../../services/clientService';
-import { Client, ClientStatus, ClientsResponse } from '../../types/client.types';
+import { Client, ClientStatus } from '../../types/client.types';
 import debounce from 'lodash.debounce';
 
 export const ClientsPage: React.FC = () => {
