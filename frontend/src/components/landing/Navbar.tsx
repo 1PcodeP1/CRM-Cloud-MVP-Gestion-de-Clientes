@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Activity } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
