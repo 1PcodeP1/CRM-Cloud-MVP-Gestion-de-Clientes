@@ -4,6 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -37,6 +38,14 @@ export class AuthService {
                 message: 'Cuenta creada correctamente. Ya puedes iniciar sesión',
             };
         } catch (error) {
+            if (error instanceof ConflictException) {
+                throw error;
+            }
+
+            if (error instanceof QueryFailedError && (error as any).driverError?.code === '23505') {
+                throw new ConflictException('Este correo ya tiene una cuenta registrada');
+            }
+
             throw new InternalServerErrorException('No fue posible crear la cuenta. Por favor intenta de nuevo más tarde');
         }
     }
