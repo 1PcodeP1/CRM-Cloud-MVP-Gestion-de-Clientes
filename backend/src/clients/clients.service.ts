@@ -96,4 +96,15 @@ export class ClientsService {
       throw new InternalServerErrorException('Error al actualizar el cliente');
     }
   }
+
+  async remove(id: string): Promise<{ message: string }> {
+    const client = await this.findOne(id);
+
+    try {
+      await this.clientRepository.remove(client);
+      return { message: 'El cliente ha sido eliminado correctamente' };
+    } catch {
+      throw new InternalServerErrorException('Error al eliminar el cliente');
+    }
+  }
 }

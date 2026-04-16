@@ -1,17 +1,20 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Plus, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
+import { SuccessBanner } from '../../components/ui/SuccessBanner';
 import { clientService } from '../../services/clientService';
 import { Client, ClientStatus, ClientsResponse } from '../../types/client.types';
 import debounce from 'lodash.debounce';
 
 export const ClientsPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [lastPage, setLastPage] = useState(1);
@@ -46,6 +49,13 @@ export const ClientsPage: React.FC = () => {
       debouncedSearch.cancel();
     };
   }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (location.state?.message && location.state?.type === 'success') {
+      setSuccessMessage(location.state.message);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   // Initial load or pagination/status changes without search typing debounce
   useEffect(() => {
@@ -90,6 +100,7 @@ export const ClientsPage: React.FC = () => {
         </div>
 
         {error && <ErrorBanner message={error} />}
+        {successMessage && <SuccessBanner message={successMessage} />}
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           {/* Filters Bar */}

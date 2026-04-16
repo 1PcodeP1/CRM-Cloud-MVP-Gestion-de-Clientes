@@ -70,4 +70,17 @@ export const clientService = {
       throw new Error('No fue posible guardar los cambios. Por favor intenta de nuevo');
     }
   },
+
+  async deleteClient(id: string): Promise<{ message: string }> {
+    try {
+      const response = await api.delete<{ message: string }>(`/clients/${id}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        const msg = error.response.data.message;
+        throw new Error(Array.isArray(msg) ? msg[0] : msg);
+      }
+      throw new Error('No fue posible eliminar el cliente. Por favor intenta de nuevo');
+    }
+  },
 };

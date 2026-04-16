@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Edit2, Trash2 } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { ErrorBanner } from '../../components/ui/ErrorBanner';
 import { clientService } from '../../services/clientService';
 import { Client, ClientStatus } from '../../types/client.types';
 
@@ -11,6 +12,7 @@ export const ClientDetailPage: React.FC = () => {
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorNotFound, setErrorNotFound] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -78,13 +80,34 @@ export const ClientDetailPage: React.FC = () => {
     }).format(new Date(dateString));
   };
 
-  const handleDelete = () => {
-    window.alert('Esta función estará disponible próximamente');
+  const handleDelete = async () => {
+    if (!client) return;
+
+    const confirmed = window.confirm(
+      `¿Estás seguro de que deseas eliminar a ${client.firstName} ${client.lastName}? Esta acción no se puede deshacer`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await clientService.deleteClient(client.id);
+      navigate('/clients', {
+        state: {
+          message: response.message || 'El cliente ha sido eliminado correctamente',
+          type: 'success',
+        },
+      });
+    } catch (error: any) {
+      setDeleteError(error.message || 'No fue posible eliminar el cliente. Por favor intenta de nuevo');
+    }
   };
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+        {deleteError && <ErrorBanner message={deleteError} />}
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate('/clients')}
