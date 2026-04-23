@@ -1,8 +1,7 @@
-// frontend/src/pages/DashboardPage.tsx
-import React, { useEffect, useState } from "react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Users, UserCheck, UserX, TrendingUp } from "lucide-react";
-import { clientService } from "../services/clientService";
+import React, { useEffect, useMemo, useState } from 'react';
+import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { clientService } from '../services/clientService';
 
 export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState({
@@ -30,8 +29,13 @@ export const DashboardPage: React.FC = () => {
           prospects: prospectRes.meta.total,
           inactive: inactiveRes.meta.total,
         });
-      } catch (error) {
-        console.error("Error loading dashboard stats", error);
+      } catch {
+        setStats({
+          total: 0,
+          active: 0,
+          prospects: 0,
+          inactive: 0,
+        });
       } finally {
         setLoading(false);
       }
@@ -40,78 +44,66 @@ export const DashboardPage: React.FC = () => {
     fetchStats();
   }, []);
 
-  const KpiCard: React.FC<{
-    label: string;
-    value: number | string;
-    sub: string;
-    icon: React.ElementType;
-    dark?: boolean;
-    color?: string;
-    pct?: number;
-  }> = ({ label, value, sub, icon: Icon, dark, color, pct }) => (
-    <div
-      className="rounded-2xl border-0 shadow-sm overflow-hidden"
-      style={{ background: dark ? "#0f1117" : "#ffffff" }}
-    >
-      <div
-        className="flex flex-col justify-between px-7 pt-7 pb-7"
-        style={{ minHeight: "180px" }}
-      >
-        {/* Top row: icon + badge */}
-        <div className="flex justify-between items-start">
-          <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center"
-            style={{
-              background: dark ? "rgba(255,255,255,0.08)" : "#dcfce7",
-            }}
-          >
-            <Icon
-              size={18}
-              style={{ color: dark ? "#94a3b8" : "#16a34a" }}
-              strokeWidth={1.8}
-            />
-          </div>
-          {pct !== undefined && !loading && stats.total > 0 && (
-            <span
-              className="text-[11px] px-2.5 py-1 rounded-full font-semibold mono"
-              style={{
-                background: dark ? "rgba(255,255,255,0.06)" : "#dcfce7",
-                color: dark ? "#64748b" : "#15803d",
-              }}
-            >
-              {pct}%
-            </span>
-          )}
-        </div>
+  const getPercent = (value: number) => {
+    if (stats.total === 0) {
+      return 0;
+    }
 
-        {/* Bottom block: label + value + sub */}
-        <div>
-          <p
-            className="text-[10px] font-bold uppercase tracking-widest mb-2"
-            style={{ color: dark ? "#4b5563" : "#b0b8c8" }}
-          >
-            {label}
-          </p>
-          <p
-            className="text-[44px] font-bold tracking-tight leading-none mb-2"
-            style={{ color: color || (dark ? "#f1f5f9" : "#111827") }}
-          >
-            {loading ? "..." : value}
-          </p>
-          <p
-            className="text-[11px]"
-            style={{ color: dark ? "#374151" : "#c4c9d4" }}
-          >
-            {sub}
-          </p>
-        </div>
-      </div>
-    </div>
+    return Math.round((value / stats.total) * 100);
+  };
+
+  const cards = useMemo(
+    () => [
+      {
+        key: 'total',
+        testId: 'kpi-total',
+        label: 'Total de clientes',
+        icon: Users,
+        value: stats.total,
+        percentage: stats.total > 0 ? 100 : 0,
+        cardClass: 'border-slate-200 bg-white',
+        iconClass: 'bg-slate-100 text-slate-700',
+        valueClass: 'text-slate-900',
+      },
+      {
+        key: 'active',
+        testId: 'kpi-active',
+        label: 'Clientes activos',
+        icon: UserCheck,
+        value: stats.active,
+        percentage: getPercent(stats.active),
+        cardClass: 'border-emerald-200 bg-emerald-50/60',
+        iconClass: 'bg-emerald-100 text-emerald-700',
+        valueClass: 'text-emerald-700',
+      },
+      {
+        key: 'prospects',
+        testId: 'kpi-prospects',
+        label: 'Prospectos',
+        icon: TrendingUp,
+        value: stats.prospects,
+        percentage: getPercent(stats.prospects),
+        cardClass: 'border-amber-200 bg-amber-50/70',
+        iconClass: 'bg-amber-100 text-amber-700',
+        valueClass: 'text-amber-700',
+      },
+      {
+        key: 'inactive',
+        testId: 'kpi-inactive',
+        label: 'Inactivos',
+        icon: UserX,
+        value: stats.inactive,
+        percentage: getPercent(stats.inactive),
+        cardClass: 'border-slate-300 bg-slate-100/70',
+        iconClass: 'bg-slate-200 text-slate-700',
+        valueClass: 'text-slate-700',
+      },
+    ],
+    [stats],
   );
 
   return (
     <DashboardLayout>
-      {/* Welcome message */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">
           Bienvenido al CRM Cloud
@@ -122,42 +114,39 @@ export const DashboardPage: React.FC = () => {
         </p>
       </div>
 
-      {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-7">
-        <KpiCard
-          label="Total clientes"
-          value={stats.total}
-          sub="Base completa"
-          icon={Users}
-          dark
-        />
-        <KpiCard
-          label="Clientes activos"
-          value={stats.active}
-          sub="En seguimiento"
-          icon={UserCheck}
-          color="#16a34a"
-          pct={Math.round((stats.active / (stats.total || 1)) * 100)}
-        />
-        <KpiCard
-          label="Prospectos"
-          value={stats.prospects}
-          sub="Por convertir"
-          icon={TrendingUp}
-          color="#d97706"
-          pct={Math.round((stats.prospects / (stats.total || 1)) * 100)}
-        />
-        <KpiCard
-          label="Inactivos"
-          value={stats.inactive}
-          sub="Sin actividad reciente"
-          icon={UserX}
-          color="#94a3b8"
-          pct={Math.round((stats.inactive / (stats.total || 1)) * 100)}
-        />
+        {cards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <article
+              key={card.key}
+              data-testid={card.testId}
+              className={`rounded-2xl border p-5 shadow-sm ${card.cardClass}`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                  {card.label}
+                </p>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.iconClass}`}>
+                  <Icon size={18} />
+                </div>
+              </div>
+
+              <p className={`text-4xl font-bold leading-none mb-3 ${card.valueClass}`}>
+                {loading ? '...' : card.value}
+              </p>
+
+              <p className="text-sm text-slate-600">
+                {loading
+                  ? 'Calculando...'
+                  : `${card.value} clientes · ${card.percentage}%`}
+              </p>
+            </article>
+          );
+        })}
       </div>
 
-      {/* Placeholder para futuras secciones */}
       <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
         <h2 className="text-lg font-semibold text-slate-800 mb-4">
           Próximamente
