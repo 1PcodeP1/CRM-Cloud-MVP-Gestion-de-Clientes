@@ -6,10 +6,15 @@ import { Client, ClientStatus } from './entities/client.entity';
 
 describe('ClientsService', () => {
   let service: ClientsService;
+  type ClientRepositoryMock = {
+    findOne: jest.Mock;
+    remove: jest.Mock;
+  };
+
   const clientRepository = {
     findOne: jest.fn(),
     remove: jest.fn(),
-  };
+  } as ClientRepositoryMock;
 
   const existingClient: Client = {
     id: 'client-1',
