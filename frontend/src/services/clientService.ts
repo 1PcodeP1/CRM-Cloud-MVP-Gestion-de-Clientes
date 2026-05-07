@@ -1,6 +1,25 @@
 import axios from 'axios';
 import { Client, ClientsResponse, CreateClientData } from '../types/client.types';
 
+export interface MonthlyStat {
+  month: string;
+  newClients: number;
+}
+
+export interface MonthlyStatsResponse {
+  data: MonthlyStat[];
+  variationText: string;
+  variationValue: number;
+}
+
+export interface AttentionClient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  company: string;
+  reason: string;
+}
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const api = axios.create({
@@ -81,6 +100,24 @@ export const clientService = {
         throw new Error(Array.isArray(msg) ? msg[0] : msg);
       }
       throw new Error('No fue posible eliminar el cliente. Por favor intenta de nuevo');
+    }
+  },
+
+  async getMonthlyStats(): Promise<MonthlyStatsResponse> {
+    try {
+      const response = await api.get<MonthlyStatsResponse>('/clients/stats/monthly');
+      return response.data;
+    } catch (error) {
+      throw new Error('No fue posible cargar las estadísticas mensuales');
+    }
+  },
+
+  async getAttentionClients(): Promise<AttentionClient[]> {
+    try {
+      const response = await api.get<AttentionClient[]>('/clients/attention');
+      return response.data;
+    } catch (error) {
+      throw new Error('No fue posible cargar los clientes que requieren atención');
     }
   },
 };

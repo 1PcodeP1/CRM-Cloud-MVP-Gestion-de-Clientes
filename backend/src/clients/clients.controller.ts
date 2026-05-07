@@ -24,6 +24,16 @@ export class ClientsController {
     return this.clientsService.findAll({ page, limit, search, status });
   }
 
+  @Get('attention')
+  getAttentionClients() {
+    return this.clientsService.getAttentionClients();
+  }
+
+  @Get('stats/monthly')
+  getMonthlyStats() {
+    return this.clientsService.getMonthlyStats();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.clientsService.findOne(id);
