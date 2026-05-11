@@ -29,7 +29,7 @@ services:
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - DB_NAME=${DB_NAME:-crm_cloud}
-      - JWT_SECRET=${JWT_SECRET:-super-secret-key-123}
+      - JWT_SECRET=${JWT_SECRET:-crm-dev-secret-change-in-production}
       - FRONTEND_URL=http://localhost:5173
     depends_on:
       - db

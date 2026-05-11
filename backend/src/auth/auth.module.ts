@@ -12,8 +12,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         PassportModule,
         JwtModule.registerAsync({
             useFactory: () => ({
-                secret: process.env.JWT_SECRET || 'super-secret-key-replace-in-production',
-                signOptions: { expiresIn: '24h' },
+                secret: process.env.JWT_SECRET || 'crm-dev-secret-change-in-production',
+                signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '24h' },
             }),
         }),
     ],

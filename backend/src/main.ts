@@ -12,6 +12,11 @@ function HttpsRedirectMiddleware(req: Request, res: Response, next: NextFunction
 }
 
 async function bootstrap() {
+    if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+        console.error('FATAL: JWT_SECRET environment variable is required in production.');
+        process.exit(1);
+    }
+
     const app = await NestFactory.create(AppModule);
 
     // HTTPS Redirect middleware (as requested)
