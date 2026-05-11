@@ -29,11 +29,8 @@ export class User {
     @Column({ length: 150 })
     company!: string;
 
-    @Column({
-        type: 'enum',
-        enum: IndustryType,
-    })
-    industry!: IndustryType;
+    @Column({ length: 100 })
+    industry!: string;
 
     @Column({ length: 255 })
     password!: string;

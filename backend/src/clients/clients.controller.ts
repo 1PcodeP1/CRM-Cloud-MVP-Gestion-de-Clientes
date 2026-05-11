@@ -51,7 +51,7 @@ export class ClientsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: any) {
-    return this.clientsService.remove(id, req.user.id);
+  remove(@Param('id') id: string) {
+    return this.clientsService.remove(id);
   }
 }
