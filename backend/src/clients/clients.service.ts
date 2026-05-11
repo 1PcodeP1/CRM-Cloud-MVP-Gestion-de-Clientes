@@ -13,6 +13,7 @@ export class ClientsService {
   ) {}
 
   async create(createClientDto: CreateClientDto, userId: string): Promise<Client> {
+    createClientDto.email = createClientDto.email.toLowerCase();
     const existingClient = await this.clientRepository.findOne({
       where: { email: createClientDto.email, userId },
     });
@@ -107,6 +108,10 @@ export class ClientsService {
   async update(id: string, updateClientDto: UpdateClientDto, userId: string): Promise<Client> {
     const client = await this.findOneOwned(id, userId);
 
+    if (updateClientDto.email) {
+      updateClientDto.email = updateClientDto.email.toLowerCase();
+    }
+
     if (updateClientDto.email && updateClientDto.email !== client.email) {
       const existingEmail = await this.clientRepository.findOne({
         where: { email: updateClientDto.email, userId },
@@ -191,10 +196,14 @@ export class ClientsService {
 
     const clients = await this.clientRepository.createQueryBuilder('client')
       .where('client.userId = :userId', { userId })
-      .andWhere('(client.status = :inactiveStatus OR client.updatedAt < :tenDaysAgo)', {
-        inactiveStatus: 'Inactivo',
-        tenDaysAgo,
-      })
+      .andWhere(
+        '(client.status = :inactiveStatus OR (client.status != :activeStatus AND client.updatedAt < :tenDaysAgo))',
+        {
+          inactiveStatus: ClientStatus.INACTIVE,
+          activeStatus: ClientStatus.ACTIVE,
+          tenDaysAgo,
+        },
+      )
       .orderBy('client.updatedAt', 'ASC')
       .take(4)
       .getMany();
@@ -202,7 +211,7 @@ export class ClientsService {
     return clients.map((client) => {
       const msDiff = new Date().getTime() - new Date(client.updatedAt).getTime();
       const daysDiff = Math.floor(msDiff / (1000 * 60 * 60 * 24));
-      const reason = client.status === 'Inactivo' ? 'Inactivo' : `${daysDiff} días sin actividad`;
+      const reason = client.status === ClientStatus.INACTIVE ? 'Inactivo' : `${daysDiff} días sin actividad`;
 
       return { id: client.id, firstName: client.firstName, lastName: client.lastName, company: client.company, reason };
     });
