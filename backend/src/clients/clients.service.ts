@@ -84,6 +84,26 @@ export class ClientsService {
     return client;
   }
 
+  // Public method for controller GET/:id — enforces ownership
+  async findOneForUser(id: string, userId: string): Promise<Client> {
+    const client = await this.clientRepository.findOne({ where: { id, userId } });
+    if (!client) {
+      throw new NotFoundException('Cliente no encontrado');
+    }
+    return client;
+  }
+
+  // Public method for controller DELETE/:id — enforces ownership
+  async removeOwned(id: string, userId: string): Promise<{ message: string }> {
+    const client = await this.findOneForUser(id, userId);
+    try {
+      await this.clientRepository.remove(client);
+      return { message: 'El cliente ha sido eliminado correctamente' };
+    } catch {
+      throw new InternalServerErrorException('Error al eliminar el cliente');
+    }
+  }
+
   async update(id: string, updateClientDto: UpdateClientDto, userId: string): Promise<Client> {
     const client = await this.findOneOwned(id, userId);
 

@@ -20,7 +20,7 @@ export class ClientsController {
     @Query('limit') limit?: number,
     @Query('search') search?: string,
     @Query('status') status?: string,
-    @Req() req?: any,
+    @Req() req: any,
   ) {
     return this.clientsService.findAll({ page, limit, search, status }, req.user.id);
   }
@@ -36,8 +36,8 @@ export class ClientsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.clientsService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.clientsService.findOneForUser(id, req.user.id);
   }
 
   @Put(':id')
@@ -46,7 +46,7 @@ export class ClientsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.clientsService.remove(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.clientsService.removeOwned(id, req.user.id);
   }
 }
