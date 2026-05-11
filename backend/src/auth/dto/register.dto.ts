@@ -1,6 +1,5 @@
 // backend/src/auth/dto/register.dto.ts
 import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength, Matches, IsEnum } from 'class-validator';
-import { Match } from '../decorators/match.decorator';
 import { IndustryType } from '../../users/entities/user.entity';
 
 export class RegisterDto {
@@ -39,9 +38,4 @@ export class RegisterDto {
     @MaxLength(255, { message: 'Máximo 255 caracteres' })
     @Matches(/^(?=.*[A-Za-z])(?=.*\d).{8,}$/, { message: 'La contraseña debe tener al menos 1 letra y 1 número' })
     password: string;
-
-    @IsString({ message: 'Confirmar contraseña es obligatorio' })
-    @IsNotEmpty({ message: 'Este campo es obligatorio' })
-    @Match('password', { message: 'Las contraseñas no coinciden' })
-    confirmPassword: string;
 }
