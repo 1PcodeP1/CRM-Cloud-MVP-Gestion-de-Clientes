@@ -190,6 +190,26 @@ export class ClientsService {
     return { data: stats, variationText, variationValue: variation };
   }
 
+  async getStatusCounts(userId: string): Promise<{ total: number; active: number; prospects: number; inactive: number }> {
+    const rows = await this.clientRepository
+      .createQueryBuilder('client')
+      .select('client.status', 'status')
+      .addSelect('COUNT(*)', 'count')
+      .where('client.userId = :userId', { userId })
+      .groupBy('client.status')
+      .getRawMany<{ status: string; count: string }>();
+
+    const counts = { total: 0, active: 0, prospects: 0, inactive: 0 };
+    for (const row of rows) {
+      const count = parseInt(row.count, 10);
+      counts.total += count;
+      if (row.status === ClientStatus.ACTIVE) counts.active = count;
+      else if (row.status === ClientStatus.PROSPECT) counts.prospects = count;
+      else if (row.status === ClientStatus.INACTIVE) counts.inactive = count;
+    }
+    return counts;
+  }
+
   async getAttentionClients(userId: string) {
     const tenDaysAgo = new Date();
     tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);

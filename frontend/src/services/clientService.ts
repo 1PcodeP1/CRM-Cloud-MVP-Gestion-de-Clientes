@@ -137,4 +137,13 @@ export const clientService = {
       throw new Error('No fue posible cargar los clientes que requieren atención');
     }
   },
+
+  async getStatusCounts(): Promise<{ total: number; active: number; prospects: number; inactive: number }> {
+    try {
+      const response = await api.get<{ total: number; active: number; prospects: number; inactive: number }>('/clients/stats/counts');
+      return response.data;
+    } catch (error) {
+      throw new Error('No fue posible cargar las estadísticas de clientes');
+    }
+  },
 };

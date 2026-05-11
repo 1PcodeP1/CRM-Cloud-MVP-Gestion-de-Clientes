@@ -30,20 +30,17 @@ export const DashboardPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const [totalRes, activeRes, prospectRes, inactiveRes, statsRes, attentionRes] = await Promise.all([
-          clientService.getClients({ limit: 1 }),
-          clientService.getClients({ limit: 1, status: 'Activo' }),
-          clientService.getClients({ limit: 1, status: 'Prospecto' }),
-          clientService.getClients({ limit: 1, status: 'Inactivo' }),
+        const [countsRes, statsRes, attentionRes] = await Promise.all([
+          clientService.getStatusCounts(),
           clientService.getMonthlyStats(),
           clientService.getAttentionClients(),
         ]);
 
         setStats({
-          total: totalRes.meta.total,
-          active: activeRes.meta.total,
-          prospects: prospectRes.meta.total,
-          inactive: inactiveRes.meta.total,
+          total: countsRes.total,
+          active: countsRes.active,
+          prospects: countsRes.prospects,
+          inactive: countsRes.inactive,
         });
 
         setChartData({

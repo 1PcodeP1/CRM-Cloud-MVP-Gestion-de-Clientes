@@ -35,6 +35,11 @@ export class ClientsController {
     return this.clientsService.getMonthlyStats(req.user.id);
   }
 
+  @Get('stats/counts')
+  getStatusCounts(@Req() req: any) {
+    return this.clientsService.getStatusCounts(req.user.id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.clientsService.findOneForUser(id, req.user.id);
