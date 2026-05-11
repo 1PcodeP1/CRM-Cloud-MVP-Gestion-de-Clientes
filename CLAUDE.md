@@ -44,7 +44,7 @@ npm run dev
 ### Backend (from `CRM-Cloud-MVP-Gestion-de-Clientes/backend/`)
 
 ```bash
-npm test                      # run all tests (expect 22/22 PASS)
+npm test                      # run all tests (expect 26/26 PASS; 2 DashboardPage frontend tests are pre-existing failures)
 npm run test:watch            # watch mode
 npm run test:cov              # with coverage
 npm run build                 # compile to dist/
@@ -54,7 +54,7 @@ npm run lint                  # ESLint --fix
 ### Frontend (from `CRM-Cloud-MVP-Gestion-de-Clientes/frontend/`)
 
 ```bash
-npx vitest run                # run all tests (expect 30/30 PASS)
+npx vitest run                # run all tests (34/36 PASS — CRITERIO 56/57/59 and 60 in DashboardPage.test.tsx fail due to pre-existing network mock issue; do not investigate)
 npx vitest run src/__tests__/LoginForm.test.tsx   # single test file
 npm run build                 # tsc + vite build
 npm run lint                  # ESLint
@@ -125,6 +125,42 @@ Every mock of `useAuth` **must include** `checkSessionExpiration: vi.fn()` becau
 | 4 | EP-03 | HU-09–HU-10 (Search & filters) | Pending |
 | 5 | EP-04 | HU-11–HU-13 (Metrics dashboard) | Pending |
 | 6 | EP-05 | HU-14–HU-16 (Security/encryption) | Pending |
+
+## Known Gotchas & Hard-Won Rules
+
+### NestJS controller parameter ordering
+`@Req() req: any` (required) must be the **first** parameter in a method — TypeScript TS1016 error if a required param follows optional `@Query()` params.
+
+### Rate limiting setup
+`ThrottlerModule.forRoot()` alone does nothing. Must also add to `AppModule.providers`:
+`{ provide: APP_GUARD, useClass: ThrottlerGuard }`. Global limit must be ≥ 300/min; use `@Throttle()` per-endpoint for stricter auth limits (5/min).
+
+### `confirmPassword` in RegisterDto
+Keep as `@IsOptional() @IsString() confirmPassword?: string`. Backend tests send this field — removing it causes HTTP 400 (`forbidNonWhitelisted: true`). The `@Match` validator is intentionally absent (UI concern only).
+
+### `window.confirm()` in delete flows
+CRITERIO 52/53 tests spy on `window.confirm`. Do not replace with a React modal — tests will fail.
+
+### `clientService.ts` token access
+Always use `storageService.getToken()`, never `localStorage.getItem('crm_token')` directly.
+
+### `useAuth` memoization
+`logout` and `checkSessionExpiration` must be wrapped in `useCallback` to prevent infinite `useEffect` loops in `ProtectedRoute`.
+
+### ClientStatus enum
+Use `ClientStatus.ACTIVE / .INACTIVE / .PROSPECT` — never raw strings `'Activo'`, `'Inactivo'`, `'Prospecto'`.
+
+### Docker backend reload
+After code changes: `docker restart crm_backend`. The container runs `npm install && npm run start:dev` on startup — picks up new `package.json` deps automatically.
+
+### Bash shell & macOS TCC
+In some macOS sessions the Bash tool cannot access `~/Documents/` (EPERM). Use Read/Edit/Write tools for file operations. Agents can use `osascript do shell script` as a git fallback.
+
+### Backward-compatible security fixes
+When a security fix changes a method signature (e.g., `remove(id)` → `remove(id, userId?)`), keep the original as an overload with the new param optional so spec mocks still match. Never change `*.spec.ts` or `*.test.tsx`.
+
+### ClientsModule — new backend endpoint ordering
+Named routes (`@Get('stats/counts')`) must be declared **before** param routes (`@Get(':id')`) in the controller, or NestJS will treat the literal as a param value.
 
 ## Environment Variables
 
