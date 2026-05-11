@@ -1,5 +1,5 @@
 // frontend/src/hooks/useAuth.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User, AuthResponse } from '../types/auth';
 import { useNavigate } from 'react-router-dom';
 import { storageService } from '../services/storageService';
@@ -13,7 +13,6 @@ const notifyListeners = () => {
     listeners.forEach(listener => listener());
 };
 
-// Inicializar desde localStorage
 const initializeAuth = () => {
     if (isInitialized) return;
     const { token, user, isExpired } = storageService.getAuth();
@@ -25,7 +24,6 @@ const initializeAuth = () => {
 };
 
 export const useAuth = () => {
-    // Inicializar antes de crear el estado
     initializeAuth();
 
     const [user, setUser] = useState<User | null>(globalUser);
@@ -51,36 +49,39 @@ export const useAuth = () => {
         notifyListeners();
     };
 
-    //El JWT es eliminado del almacenamiento del navegador (localStorage) y el estado de autenticación se restablece. Luego, el usuario es redirigido a la página de inicio de sesión con un mensaje opcional.
-    const logout = (message?: string, isSuccess: boolean = false) => {
+    const logout = useCallback((message?: string, isSuccess: boolean = false) => {
         globalUser = null;
         globalToken = null;
         storageService.clearAuth();
         notifyListeners();
-        navigate('/login', { 
-            replace: true, 
-            state: { 
+        navigate('/login', {
+            replace: true,
+            state: {
                 message,
                 type: isSuccess ? 'success' : 'error'
-            } 
+            }
         });
-    };
+    }, [navigate]);
 
-    const checkSessionExpiration = (): boolean => {
+    const checkSessionExpiration = useCallback((): boolean => {
         const { isExpired } = storageService.getAuth();
         if (isExpired && globalToken) {
             logout('Tu sesión ha expirado. Por favor ingresa de nuevo', false);
             return true;
         }
+        if (globalToken && !storageService.hasAuth()) {
+            logout('Tu sesión ha expirado. Por favor ingresa de nuevo', false);
+            return true;
+        }
         return false;
-    };
+    }, [logout]);
 
-    return { 
-        user, 
-        token, 
-        setAuth, 
-        logout, 
+    return {
+        user,
+        token,
+        setAuth,
+        logout,
         checkSessionExpiration,
-        isAuthenticated: !!globalToken 
+        isAuthenticated: !!globalToken
     };
 };

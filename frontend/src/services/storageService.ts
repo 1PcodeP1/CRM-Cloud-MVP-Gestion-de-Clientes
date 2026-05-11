@@ -49,5 +49,9 @@ export const storageService = {
 
     hasAuth(): boolean {
         return !!localStorage.getItem(TOKEN_KEY);
-    }
+    },
+
+    getToken(): string | null {
+        return localStorage.getItem(TOKEN_KEY);
+    },
 };

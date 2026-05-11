@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Client, ClientsResponse, CreateClientData } from '../types/client.types';
+import { storageService } from './storageService';
 
 export interface MonthlyStat {
   month: string;
@@ -30,12 +31,28 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('crm_token');
+  const token = storageService.getToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+export let onUnauthorized: (() => void) | null = null;
+
+export const setUnauthorizedHandler = (handler: () => void) => {
+  onUnauthorized = handler;
+};
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && onUnauthorized) {
+      onUnauthorized();
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const clientService = {
   async getClients(params?: {
