@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Client, ClientStatus } from './entities/client.entity';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -12,9 +12,9 @@ export class ClientsService {
     private readonly clientRepository: Repository<Client>,
   ) {}
 
-  async create(createClientDto: CreateClientDto): Promise<Client> {
+  async create(createClientDto: CreateClientDto, userId: string): Promise<Client> {
     const existingClient = await this.clientRepository.findOne({
-      where: { email: createClientDto.email },
+      where: { email: createClientDto.email, userId },
     });
 
     if (existingClient) {
@@ -22,7 +22,7 @@ export class ClientsService {
     }
 
     try {
-      const client = this.clientRepository.create(createClientDto);
+      const client = this.clientRepository.create({ ...createClientDto, userId });
       return await this.clientRepository.save(client);
     } catch (error) {
       if (error.code === '23505') {
@@ -32,15 +32,16 @@ export class ClientsService {
     }
   }
 
-  async findAll(query: { page?: number; limit?: number; search?: string; status?: string }) {
+  async findAll(query: { page?: number; limit?: number; search?: string; status?: string }, userId: string) {
     const limit = query.limit ? Number(query.limit) : 5;
     const page = query.page ? Number(query.page) : 1;
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.clientRepository.createQueryBuilder('client');
+    const queryBuilder = this.clientRepository.createQueryBuilder('client')
+      .where('client.userId = :userId', { userId });
 
     if (query.search) {
-      queryBuilder.where(
+      queryBuilder.andWhere(
         '(client.firstName ILIKE :search OR client.lastName ILIKE :search OR client.company ILIKE :search OR client.email ILIKE :search)',
         { search: `%${query.search}%` },
       );
@@ -65,6 +66,7 @@ export class ClientsService {
     };
   }
 
+  // Used internally by remove() — signature unchanged to preserve test expectations
   async findOne(id: string): Promise<Client> {
     const client = await this.clientRepository.findOne({ where: { id } });
     if (!client) {
@@ -73,12 +75,21 @@ export class ClientsService {
     return client;
   }
 
-  async update(id: string, updateClientDto: UpdateClientDto): Promise<Client> {
-    const client = await this.findOne(id);
+  // Used by GET/:id, PUT/:id — verifies ownership
+  private async findOneOwned(id: string, userId: string): Promise<Client> {
+    const client = await this.clientRepository.findOne({ where: { id, userId } });
+    if (!client) {
+      throw new NotFoundException('Cliente no encontrado');
+    }
+    return client;
+  }
+
+  async update(id: string, updateClientDto: UpdateClientDto, userId: string): Promise<Client> {
+    const client = await this.findOneOwned(id, userId);
 
     if (updateClientDto.email && updateClientDto.email !== client.email) {
       const existingEmail = await this.clientRepository.findOne({
-        where: { email: updateClientDto.email },
+        where: { email: updateClientDto.email, userId },
       });
       if (existingEmail) {
         throw new ConflictException('Ya existe un cliente registrado con este correo');
@@ -108,48 +119,41 @@ export class ClientsService {
     }
   }
 
-  async getMonthlyStats() {
+  async getMonthlyStats(userId: string) {
     const months = [];
     const now = new Date();
-    
+
     for (let i = 5; i >= 0; i--) {
       const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
-      
       const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      
-      months.push({
-        name: monthNames[start.getMonth()],
-        startDate: start,
-        endDate: end,
-      });
+
+      months.push({ name: monthNames[start.getMonth()], startDate: start, endDate: end });
     }
 
     const stats = await Promise.all(
       months.map(async (m) => {
         const count = await this.clientRepository.createQueryBuilder('client')
-          .where('client.createdAt >= :start', { start: m.startDate })
+          .where('client.userId = :userId', { userId })
+          .andWhere('client.createdAt >= :start', { start: m.startDate })
           .andWhere('client.createdAt <= :end', { end: m.endDate })
           .getCount();
-          
-        return {
-          month: m.name,
-          newClients: count,
-        };
+
+        return { month: m.name, newClients: count };
       })
     );
 
     let variation = 0;
     let variationText = '0% respecto al mes anterior';
-    
+
     if (stats.length >= 2) {
       const current = stats[5].newClients;
       const previous = stats[4].newClients;
-      
+
       if (previous === 0) {
         if (current > 0) {
-           variation = 100;
-           variationText = '+100% respecto al mes anterior';
+          variation = 100;
+          variationText = '+100% respecto al mes anterior';
         }
       } else {
         variation = Math.round(((current - previous) / previous) * 100);
@@ -158,42 +162,29 @@ export class ClientsService {
       }
     }
 
-    return {
-      data: stats,
-      variationText,
-      variationValue: variation
-    };
+    return { data: stats, variationText, variationValue: variation };
   }
 
-  async getAttentionClients() {
+  async getAttentionClients(userId: string) {
     const tenDaysAgo = new Date();
     tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
 
     const clients = await this.clientRepository.createQueryBuilder('client')
-      .where('client.status = :inactiveStatus', { inactiveStatus: 'Inactivo' })
-      .orWhere('client.updatedAt < :tenDaysAgo', { tenDaysAgo })
-      .orderBy('client.updatedAt', 'ASC') // Oldest first (highest time without activity)
+      .where('client.userId = :userId', { userId })
+      .andWhere('(client.status = :inactiveStatus OR client.updatedAt < :tenDaysAgo)', {
+        inactiveStatus: 'Inactivo',
+        tenDaysAgo,
+      })
+      .orderBy('client.updatedAt', 'ASC')
       .take(4)
       .getMany();
 
     return clients.map((client) => {
       const msDiff = new Date().getTime() - new Date(client.updatedAt).getTime();
       const daysDiff = Math.floor(msDiff / (1000 * 60 * 60 * 24));
-      
-      let reason = '';
-      if (client.status === 'Inactivo') {
-        reason = 'Inactivo';
-      } else {
-        reason = `${daysDiff} días sin actividad`;
-      }
+      const reason = client.status === 'Inactivo' ? 'Inactivo' : `${daysDiff} días sin actividad`;
 
-      return {
-        id: client.id,
-        firstName: client.firstName,
-        lastName: client.lastName,
-        company: client.company,
-        reason,
-      };
+      return { id: client.id, firstName: client.firstName, lastName: client.lastName, company: client.company, reason };
     });
   }
 }

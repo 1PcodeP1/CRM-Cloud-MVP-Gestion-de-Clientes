@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Param, Put, Delete, Req } from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -10,8 +10,8 @@ export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Post()
-  create(@Body() createClientDto: CreateClientDto) {
-    return this.clientsService.create(createClientDto);
+  create(@Body() createClientDto: CreateClientDto, @Req() req: any) {
+    return this.clientsService.create(createClientDto, req.user.id);
   }
 
   @Get()
@@ -20,18 +20,19 @@ export class ClientsController {
     @Query('limit') limit?: number,
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Req() req?: any,
   ) {
-    return this.clientsService.findAll({ page, limit, search, status });
+    return this.clientsService.findAll({ page, limit, search, status }, req.user.id);
   }
 
   @Get('attention')
-  getAttentionClients() {
-    return this.clientsService.getAttentionClients();
+  getAttentionClients(@Req() req: any) {
+    return this.clientsService.getAttentionClients(req.user.id);
   }
 
   @Get('stats/monthly')
-  getMonthlyStats() {
-    return this.clientsService.getMonthlyStats();
+  getMonthlyStats(@Req() req: any) {
+    return this.clientsService.getMonthlyStats(req.user.id);
   }
 
   @Get(':id')
@@ -40,8 +41,8 @@ export class ClientsController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
-    return this.clientsService.update(id, updateClientDto);
+  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto, @Req() req: any) {
+    return this.clientsService.update(id, updateClientDto, req.user.id);
   }
 
   @Delete(':id')

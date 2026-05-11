@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Unique } from 'typeorm';
 
 export enum ClientStatus {
   ACTIVE = 'Activo',
@@ -7,9 +7,13 @@ export enum ClientStatus {
 }
 
 @Entity('clients')
+@Unique(['email', 'userId'])
 export class Client {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ name: 'user_id', nullable: true })
+  userId?: string;
 
   @Column({ name: 'first_name' })
   firstName: string;
@@ -20,7 +24,7 @@ export class Client {
   @Column()
   company: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column()

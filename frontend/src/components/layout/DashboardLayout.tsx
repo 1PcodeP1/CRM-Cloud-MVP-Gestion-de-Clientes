@@ -49,7 +49,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex bg-[#f4f5f7]">
+    <div className="h-screen flex bg-[#f4f5f7] overflow-hidden">
       {/* Sidebar */}
       {sidebarOpen && (
         <aside
