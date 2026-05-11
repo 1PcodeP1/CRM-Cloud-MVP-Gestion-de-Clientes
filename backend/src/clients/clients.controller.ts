@@ -16,11 +16,11 @@ export class ClientsController {
 
   @Get()
   findAll(
+    @Req() req: any,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('search') search?: string,
     @Query('status') status?: string,
-    @Req() req: any,
   ) {
     return this.clientsService.findAll({ page, limit, search, status }, req.user.id);
   }
@@ -52,6 +52,6 @@ export class ClientsController {
 
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: any) {
-    return this.clientsService.removeOwned(id, req.user.id);
+    return this.clientsService.remove(id, req.user.id);
   }
 }

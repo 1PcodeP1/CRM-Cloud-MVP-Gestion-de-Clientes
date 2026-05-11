@@ -16,7 +16,8 @@ const api = axios.create({
 export const authService = {
     async register(data: RegisterFormValues): Promise<RegisterResponse> {
         try {
-            const response = await api.post<RegisterResponse>('/auth/register', data);
+            const { confirmPassword: _confirm, ...payload } = data as any;
+            const response = await api.post<RegisterResponse>('/auth/register', payload);
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.data?.message) {
