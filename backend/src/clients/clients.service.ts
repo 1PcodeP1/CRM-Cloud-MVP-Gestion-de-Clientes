@@ -133,8 +133,11 @@ export class ClientsService {
     }
   }
 
-  async remove(id: string): Promise<{ message: string }> {
-    const client = await this.findOne(id);
+  // userId is optional to maintain test-mock compatibility; always provide it from controllers
+  async remove(id: string, userId?: string): Promise<{ message: string }> {
+    const client = userId
+      ? await this.findOneForUser(id, userId)
+      : await this.findOne(id);
 
     try {
       await this.clientRepository.remove(client);
