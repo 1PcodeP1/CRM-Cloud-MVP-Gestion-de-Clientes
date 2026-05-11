@@ -17,7 +17,7 @@ export const registerSchema = z.object({
         .min(1, 'Este campo es obligatorio')
         .min(8, 'Mínimo 8 caracteres')
         .max(255, 'Máximo 255 caracteres')
-        .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 'La contraseña debe tener al menos 1 letra y 1 número'),
+        .regex(/^(?=.*[A-Za-z])(?=.*\d).{8,}$/, 'La contraseña debe tener al menos 1 letra y 1 número'),
     confirmPassword: z.string().min(1, 'Este campo es obligatorio')
 }).superRefine((data, ctx) => {
     if (data.password && data.confirmPassword && data.password !== data.confirmPassword) {

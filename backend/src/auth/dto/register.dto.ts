@@ -36,7 +36,7 @@ export class RegisterDto {
     @IsNotEmpty({ message: 'Este campo es obligatorio' })
     @MinLength(8, { message: 'Mínimo 8 caracteres' })
     @MaxLength(255, { message: 'Máximo 255 caracteres' })
-    @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, { message: 'La contraseña debe tener al menos 1 letra y 1 número' })
+    @Matches(/^(?=.*[A-Za-z])(?=.*\d).{8,}$/, { message: 'La contraseña debe tener al menos 1 letra y 1 número' })
     password: string;
 
     @IsString({ message: 'Confirmar contraseña es obligatorio' })
