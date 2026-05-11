@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
-import { clientService } from '../services/clientService';
+import { clientService, MonthlyStat, AttentionClient } from '../services/clientService';
+import { MonthlyRegistrationsChart } from '../components/dashboard/MonthlyRegistrationsChart';
+import { AttentionClientsList } from '../components/dashboard/AttentionClientsList';
 
 export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState({
@@ -10,6 +12,16 @@ export const DashboardPage: React.FC = () => {
     prospects: 0,
     inactive: 0,
   });
+  const [chartData, setChartData] = useState<{
+    data: MonthlyStat[];
+    variationText: string;
+    variationValue: number;
+  }>({
+    data: [],
+    variationText: '',
+    variationValue: 0,
+  });
+  const [attentionClients, setAttentionClients] = useState<AttentionClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,11 +30,13 @@ export const DashboardPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const [totalRes, activeRes, prospectRes, inactiveRes] = await Promise.all([
+        const [totalRes, activeRes, prospectRes, inactiveRes, statsRes, attentionRes] = await Promise.all([
           clientService.getClients({ limit: 1 }),
           clientService.getClients({ limit: 1, status: 'Activo' }),
           clientService.getClients({ limit: 1, status: 'Prospecto' }),
           clientService.getClients({ limit: 1, status: 'Inactivo' }),
+          clientService.getMonthlyStats(),
+          clientService.getAttentionClients(),
         ]);
 
         setStats({
@@ -31,6 +45,14 @@ export const DashboardPage: React.FC = () => {
           prospects: prospectRes.meta.total,
           inactive: inactiveRes.meta.total,
         });
+
+        setChartData({
+          data: statsRes.data,
+          variationText: statsRes.variationText,
+          variationValue: statsRes.variationValue,
+        });
+
+        setAttentionClients(attentionRes);
       } catch {
         setError('No pudimos conectar con el servidor. Por favor, verifica tu conexión a internet o intenta recargar la página.');
         setStats({
@@ -116,8 +138,8 @@ export const DashboardPage: React.FC = () => {
           <p className="text-slate-600 max-w-md mb-8">
             {error}
           </p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors shadow-sm"
           >
             Reintentar conexión
@@ -172,6 +194,19 @@ export const DashboardPage: React.FC = () => {
         })}
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <MonthlyRegistrationsChart
+          data={chartData.data}
+          variationText={chartData.variationText}
+          variationValue={chartData.variationValue}
+          loading={loading}
+        />
+
+        <AttentionClientsList
+          clients={attentionClients}
+          loading={loading}
+        />
+      </div>
     </DashboardLayout>
   );
 };
