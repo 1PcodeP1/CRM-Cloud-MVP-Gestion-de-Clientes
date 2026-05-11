@@ -14,7 +14,7 @@ import { ClientsModule } from './clients/clients.module';
         }),
         ThrottlerModule.forRoot([{
             ttl: 60000,
-            limit: 10,
+            limit: 300,
         }]),
         TypeOrmModule.forRoot({
             type: 'postgres',
