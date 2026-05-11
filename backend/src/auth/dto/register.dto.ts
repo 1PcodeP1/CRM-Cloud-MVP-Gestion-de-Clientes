@@ -1,6 +1,7 @@
 // backend/src/auth/dto/register.dto.ts
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength, Matches, IsIn } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength, Matches, IsEnum } from 'class-validator';
 import { Match } from '../decorators/match.decorator';
+import { IndustryType } from '../../users/entities/user.entity';
 
 export class RegisterDto {
     @IsString({ message: 'El nombre debe ser válido' })
@@ -29,8 +30,8 @@ export class RegisterDto {
     company: string;
 
     @IsNotEmpty({ message: 'Este campo es obligatorio' })
-    @IsIn(['Tecnología', 'Comercio', 'Servicios', 'Educación', 'Salud'], { message: 'Industria no válida' })
-    industry: string;
+    @IsEnum(IndustryType, { message: 'Industria no válida' })
+    industry: IndustryType;
 
     @IsString({ message: 'La contraseña debe ser válida' })
     @IsNotEmpty({ message: 'Este campo es obligatorio' })

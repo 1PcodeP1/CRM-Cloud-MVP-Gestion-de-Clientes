@@ -1,6 +1,14 @@
 // backend/src/users/entities/user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
+export enum IndustryType {
+  TECNOLOGIA = 'Tecnología',
+  COMERCIO = 'Comercio',
+  SERVICIOS = 'Servicios',
+  EDUCACION = 'Educación',
+  SALUD = 'Salud',
+}
+
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -21,8 +29,11 @@ export class User {
     @Column({ length: 150 })
     company!: string;
 
-    @Column({ length: 100 })
-    industry!: string;
+    @Column({
+        type: 'enum',
+        enum: IndustryType,
+    })
+    industry!: IndustryType;
 
     @Column({ length: 255 })
     password!: string;
