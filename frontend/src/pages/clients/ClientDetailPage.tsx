@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Edit2, Trash2 } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
+import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { clientService } from '../../services/clientService';
 import { Client, ClientStatus } from '../../types/client.types';
 
@@ -13,6 +14,7 @@ export const ClientDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [errorNotFound, setErrorNotFound] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -80,17 +82,11 @@ export const ClientDetailPage: React.FC = () => {
     }).format(new Date(dateString));
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => setShowDeleteModal(true);
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteModal(false);
     if (!client) return;
-
-    const confirmed = window.confirm(
-      `¿Estás seguro de que deseas eliminar a ${client.firstName} ${client.lastName}? Esta acción no se puede deshacer`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     try {
       const response = await clientService.deleteClient(client.id);
       navigate('/clients', {
@@ -118,7 +114,7 @@ export const ClientDetailPage: React.FC = () => {
           </button>
           <div className="flex items-center gap-3">
             <button
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors"
             >
               <Trash2 size={16} />
@@ -178,6 +174,16 @@ export const ClientDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Eliminar cliente"
+        message="¿Estás seguro que deseas eliminar este cliente? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        isDestructive
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </DashboardLayout>
   );
 };

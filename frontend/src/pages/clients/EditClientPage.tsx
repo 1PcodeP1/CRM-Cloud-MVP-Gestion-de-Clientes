@@ -6,6 +6,7 @@ import { Building2, Mail, Phone, User, Users } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { InputField } from '../../components/ui/InputField';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
+import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { createClientSchema, CreateClientFormData } from '../../schemas/clientSchema';
 import { clientService } from '../../services/clientService';
 import { ClientStatus } from '../../types/client.types';
@@ -16,6 +17,7 @@ export const EditClientPage: React.FC = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const {
     register,
@@ -71,12 +73,15 @@ export const EditClientPage: React.FC = () => {
 
   const handleCancel = () => {
     if (isDirty) {
-      if (window.confirm('¿Deseas salir sin guardar los cambios realizados?')) {
-        navigate(`/clients/${id}`);
-      }
+      setShowCancelModal(true);
     } else {
       navigate(`/clients/${id}`);
     }
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelModal(false);
+    navigate(`/clients/${id}`);
   };
 
   if (loading) {
@@ -188,6 +193,15 @@ export const EditClientPage: React.FC = () => {
           </div>
         </form>
       </div>
+      <ConfirmModal
+        isOpen={showCancelModal}
+        title="Descartar cambios"
+        message="¿Deseas salir sin guardar los cambios realizados?"
+        confirmLabel="Salir sin guardar"
+        cancelLabel="Seguir editando"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setShowCancelModal(false)}
+      />
     </DashboardLayout>
   );
 };

@@ -57,10 +57,12 @@ export const ClientsPage: React.FC = () => {
     }
   }, [location]);
 
-  // Initial load or pagination/status changes without search typing debounce
+  // Initial load and pagination — status changes are handled directly in the onChange handler
+  // to avoid double-fetch (setPage(1) + status update each trigger the effect separately)
   useEffect(() => {
     fetchClients(page, search, status);
-  }, [page, status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -129,8 +131,10 @@ export const ClientsPage: React.FC = () => {
               <select
                 value={status}
                 onChange={(e) => {
-                  setStatus(e.target.value);
+                  const newStatus = e.target.value;
+                  setStatus(newStatus);
                   setPage(1);
+                  fetchClients(1, search, newStatus);
                 }}
                 className="flex-1 py-2 px-3 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
