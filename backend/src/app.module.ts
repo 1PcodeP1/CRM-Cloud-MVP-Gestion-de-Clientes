@@ -25,6 +25,7 @@ import { ClientsModule } from './clients/clients.module';
             database: process.env.DB_NAME || 'crm_cloud',
             autoLoadEntities: true,
             synchronize: process.env.NODE_ENV !== 'production', // Don't use true in production
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         }),
         UsersModule,
         AuthModule,
