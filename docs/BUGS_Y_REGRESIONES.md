@@ -166,6 +166,20 @@ En la sesión final se realizó una revisión exhaustiva del código completo. S
 
 ---
 
+## Despliegue a Producción (Render + Vercel + Supabase) {#despliegue}
+
+Durante el paso del entorno de desarrollo a producción, se presentaron varios problemas de infraestructura y conectividad.
+
+### Bugs encontrados
+
+| ID | Ubicación | Problema | Solución aplicada |
+|---|---|---|---|
+| D-1 | Vercel (Frontend) | Al recargar directamente una página de React Router (ej. `/dashboard`), Vercel devolvía `404 NOT_FOUND` porque intentaba buscar el archivo físico en el servidor. | Se creó el archivo `frontend/vercel.json` configurando las reescrituras (`rewrites`) para redirigir todo el tráfico a `/index.html`. |
+| D-2 | Render a Supabase (Backend) | Las peticiones al backend fallaban con HTTP 500 porque TypeORM no podía establecer el handshake SSL con el Transaction Pooler (puerto 6543) de Supabase. | Se configuró explícitamente `extra: { ssl: { rejectUnauthorized: false } }` en el `TypeOrmModule.forRoot` en `app.module.ts`. |
+| D-3 | Supabase (Base de Datos) | La interfaz mostraba error 500 porque las consultas GET/POST a `/clients` fallaban. TypeORM en producción tiene `synchronize: false`, por lo que la columna `user_id` de la tabla `clients` no se generó. | Se ejecutó una migración manual vía script SQL (`ALTER TABLE clients ADD COLUMN user_id uuid;`) directamente en la base de datos de producción para alinear el esquema. |
+
+---
+
 ## Bugs pendientes / aceptados por restricción de tests {#pendientes}
 
 Los siguientes problemas fueron identificados pero **no pueden resolverse sin modificar los tests de aceptación** (`*.spec.ts` / `*.test.tsx`). Se documentan como deuda técnica:
@@ -190,9 +204,10 @@ Sprint 4  ──► 2 bugs medios (regex contraseña, package-lock)
 Sprint 5  ──► Sin bugs críticos nuevos
 Sprint 6  ──► 2 bugs (atención clientes, aislamiento rutas detalle/delete)
 Auditoría ──► 17 bugs (3 críticos, 6 importantes, 4 correctitud, 4 menores + 5 pendientes)
+Despliegue ─► 3 bugs (Vercel 404, Supabase SSL, Supabase user_id faltante)
 ```
 
-**Total bugs documentados:** 34 (17 en auditoría + 12 durante el desarrollo + 5 pendientes)
+**Total bugs documentados:** 37 (17 en auditoría + 12 durante el desarrollo + 3 en despliegue + 5 pendientes)
 
 ---
 
@@ -210,6 +225,8 @@ Auditoría ──► 17 bugs (3 críticos, 6 importantes, 4 correctitud, 4 menor
 
 6. **Rate limiting necesita un límite global generoso.** Un límite de 10/min global bloquea el dashboard normal (6 llamadas solo en la carga inicial).
 
+7. **Configuración de Producción vs Desarrollo.** TypeORM con `synchronize: false` requiere que la base de datos de producción tenga la misma estructura antes de que la aplicación reciba tráfico. Fallar en migrar una columna (como `user_id`) rompe la aplicación por completo sin dar error en los logs de despliegue.
+
 ---
 
-*Generado: 2026-05-11 — Sesión de auditoría y bug-fixing CRM Cloud MVP*
+*Generado: 2026-05-13 — Sesión de despliegue CRM Cloud MVP*
