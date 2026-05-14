@@ -22,7 +22,7 @@ Sistema de gestión de relaciones con clientes (CRM) desarrollado como proyecto 
 
 | Servicio | URL |
 | --- | --- |
-| Frontend | Vercel (CI/CD automático desde `main`) |
+| Frontend | Vercel (redespliegue automático desde `main`) |
 | Backend API | `https://crm-cloud-mvp-gestion-de-clientes.onrender.com` |
 | Base de datos | Supabase · `aws-1-us-east-2.pooler.supabase.com:6543` |
 

@@ -51,4 +51,4 @@ Las siguientes configuraciones rigen el sistema en producción (se ocultan secre
 
 ## 4. Conclusión
 
-El sistema CRM se encuentra 100% operativo en la nube. El ciclo de integración continua (CI/CD) está configurado: cualquier cambio empujado a la rama `main` en GitHub causará que Render actualice automáticamente el servidor API y Vercel actualice la interfaz de usuario en tiempo real.
+El sistema CRM se encuentra 100% operativo en la nube. Cualquier cambio empujado a la rama `main` en GitHub causará que Render actualice automáticamente el servidor API y Vercel actualice la interfaz de usuario en tiempo real.

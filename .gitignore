@@ -60,6 +60,5 @@ SPRINT*-REPORT.md
 
 # ─── Artefactos de testing y herramientas locales ─────────
 .playwright-mcp/
-*.pptx
 t[0-9]-*.png
 test[0-9]-*.png

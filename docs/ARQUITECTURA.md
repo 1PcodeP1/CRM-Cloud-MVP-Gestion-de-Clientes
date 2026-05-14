@@ -53,7 +53,7 @@ Si mañana el frontend necesita reescribirse en otro framework, el backend no ca
 Optamos por **plataformas gestionadas** (Vercel, Render, Supabase) en lugar de provisionar servidores propios. Razones:
 
 - **Cero administración de infraestructura** — sin sistemas operativos que parchar, sin nginx que configurar, sin certificados TLS que renovar manualmente.
-- **CI/CD nativo** — cualquier `git push` a `main` activa el redespliegue automático en Vercel (frontend) y Render (backend).
+- **Redespliegue automático** — cualquier `git push` a `main` activa la reconstrucción y publicación en Vercel (frontend) y Render (backend) gracias a la integración nativa de ambas plataformas con GitHub.
 - **Capa gratuita** suficiente para un MVP universitario.
 - **HTTPS por defecto** en las tres capas, sin configuración adicional.
 
@@ -190,5 +190,5 @@ La gestión de estado de sesión NO usa Context API ni Redux. En su lugar, `useA
 | **Autenticación** | JWT stateless (24h) + bcrypt (10 rounds) |
 | **Autorización** | Filtrado por `userId` en cada query (aislamiento multi-tenant a nivel de app) |
 | **Persistencia** | PostgreSQL gestionado vía TypeORM + Supabase Pooler |
-| **Despliegue** | CI/CD automático: GitHub → Vercel (frontend) + Render (backend) |
+| **Despliegue** | Redespliegue automático: GitHub → Vercel (frontend) + Render (backend) |
 | **Seguridad adicional** | Rate limiting, validación de DTOs (class-validator), HTTPS forzado, CORS configurable |
