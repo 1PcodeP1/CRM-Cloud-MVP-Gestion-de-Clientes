@@ -1,0 +1,151 @@
+classDiagram
+    direction LR
+
+    class User {
+        +string id (UUID, PK)
+        +string firstName
+        +string lastName
+        +string email (unique)
+        +string phone
+        +string company
+        +string industry
+        +string password (bcrypt hash)
+        +Date createdAt
+    }
+
+    class Client {
+        +string id (UUID, PK)
+        +string userId (FK → User)
+        +string firstName
+        +string lastName
+        +string company
+        +string email
+        +string phone
+        +ClientStatus status
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class IndustryType {
+        <<enumeration>>
+        TECNOLOGIA
+        COMERCIO
+        SERVICIOS
+        EDUCACION
+        SALUD
+    }
+
+    class ClientStatus {
+        <<enumeration>>
+        ACTIVE
+        PROSPECT
+        INACTIVE
+    }
+
+    class RegisterDto {
+        +string firstName
+        +string lastName
+        +string email
+        +string phone
+        +string company
+        +string industry
+        +string password
+        +string confirmPassword?
+    }
+
+    class LoginDto {
+        +string email
+        +string password
+    }
+
+    class CreateClientDto {
+        +string firstName
+        +string lastName
+        +string company
+        +string email
+        +string phone
+        +ClientStatus status
+    }
+
+    class UpdateClientDto {
+        <<partial CreateClientDto>>
+    }
+
+    class UsersService {
+        -Repository~User~ usersRepository
+        +findByEmail(email) Promise~User~
+        +create(userData) Promise~User~
+    }
+
+    class AuthService {
+        -UsersService usersService
+        -JwtService jwtService
+        +register(dto) Promise~object~
+        +login(dto) Promise~AuthResponse~
+    }
+
+    class ClientsService {
+        -Repository~Client~ clientRepository
+        +create(dto, userId) Promise~Client~
+        +findAll(query, userId) Promise~PaginatedResponse~
+        +findOneForUser(id, userId) Promise~Client~
+        +update(id, dto, userId) Promise~Client~
+        +removeOwned(id, userId) Promise~void~
+        +getStatsCounts(userId) Promise~Stats~
+        +getMonthlyStats(userId) Promise~MonthlyData[]~
+        +getAttentionClients(userId) Promise~Client[]~
+    }
+
+    class AuthController {
+        -AuthService authService
+        +register(RegisterDto) Promise
+        +login(LoginDto) Promise
+    }
+
+    class ClientsController {
+        -ClientsService clientsService
+        +create(req, dto)
+        +findAll(req, query)
+        +findOne(req, id)
+        +update(req, id, dto)
+        +remove(req, id)
+        +getStats(req)
+        +getAttention(req)
+    }
+
+    class JwtStrategy {
+        +validate(payload) UserPayload
+    }
+
+    class JwtAuthGuard {
+        <<Passport JWT>>
+    }
+
+    class ThrottlerGuard {
+        <<Global APP_GUARD>>
+        +Global: 300 req/min
+        +Auth: 5 req/min
+    }
+
+    User "1" --> "0..*" Client : owns (via userId)
+    User --> IndustryType : uses
+    Client --> ClientStatus : uses
+
+    AuthController --> AuthService
+    AuthController ..> RegisterDto
+    AuthController ..> LoginDto
+    AuthService --> UsersService
+    AuthService ..> User
+
+    ClientsController --> ClientsService
+    ClientsController --> JwtAuthGuard
+    ClientsController ..> CreateClientDto
+    ClientsController ..> UpdateClientDto
+
+    ClientsService ..> Client
+    UsersService ..> User
+
+    JwtAuthGuard --> JwtStrategy
+    JwtStrategy ..> User : verifies payload
+
+    UpdateClientDto --|> CreateClientDto : extends partial

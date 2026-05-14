@@ -1,0 +1,67 @@
+graph TB
+    subgraph user["👤 Usuario"]
+        Browser[Navegador Web]
+    end
+
+    subgraph presentation["🌐 PRESENTATION TIER · Vercel"]
+        subgraph frontend["React 18 + Vite + TypeScript"]
+            Pages["📄 Pages<br/>LandingPage · LoginPage · RegisterPage<br/>DashboardPage · ClientsPage<br/>ClientDetailPage · EditClientPage"]
+            Components["🧩 Components<br/>auth/ · layout/ · router/ · ui/"]
+            Hooks["🪝 useAuth<br/>(listeners pattern)"]
+            Services["⚙️ Services<br/>authService · clientService<br/>storageService"]
+            Schemas["✅ Zod Schemas<br/>loginSchema · registerSchema<br/>clientSchema"]
+        end
+    end
+
+    subgraph application["⚙️ APPLICATION TIER · Render"]
+        subgraph backend["NestJS + TypeScript + TypeORM"]
+            subgraph authMod["AuthModule"]
+                AuthCtrl["AuthController<br/>POST /auth/register<br/>POST /auth/login"]
+                AuthSvc["AuthService<br/>bcrypt + JWT"]
+                JwtStrat["JwtStrategy<br/>(Passport)"]
+                JwtGuard["JwtAuthGuard"]
+            end
+            subgraph usersMod["UsersModule"]
+                UsersSvc["UsersService<br/>findByEmail · create"]
+            end
+            subgraph clientsMod["ClientsModule"]
+                ClientsCtrl["ClientsController<br/>GET·POST·PUT·DELETE /clients<br/>GET /clients/stats<br/>GET /clients/attention"]
+                ClientsSvc["ClientsService<br/>CRUD + filtros + agregados"]
+            end
+            Throttler["🛡️ ThrottlerGuard<br/>Global: 300/min<br/>Auth: 5/min"]
+        end
+    end
+
+    subgraph data["💾 DATA TIER · Supabase"]
+        Pooler["Supavisor Pooler<br/>aws-1-us-east-2:6543<br/>(IPv4 → IPv6 bridge)"]
+        subgraph db["PostgreSQL 15"]
+            UsersTbl[("📋 users<br/>id · email · password<br/>firstName · lastName<br/>company · industry · phone")]
+            ClientsTbl[("📋 clients<br/>id · user_id · email<br/>firstName · lastName<br/>company · phone · status<br/>created_at · updated_at")]
+        end
+    end
+
+    Browser -->|HTTPS| Pages
+    Pages --> Components
+    Components --> Hooks
+    Hooks --> Services
+    Components --> Schemas
+    Services -->|HTTPS REST + JWT Bearer| Throttler
+    Throttler --> AuthCtrl
+    Throttler --> ClientsCtrl
+    AuthCtrl --> AuthSvc
+    AuthSvc --> UsersSvc
+    JwtGuard --> JwtStrat
+    ClientsCtrl --> JwtGuard
+    ClientsCtrl --> ClientsSvc
+    UsersSvc -->|TypeORM Repository| Pooler
+    ClientsSvc -->|TypeORM Repository| Pooler
+    Pooler --> UsersTbl
+    Pooler --> ClientsTbl
+
+    classDef tier fill:#1e293b,stroke:#0f172a,color:#fff,stroke-width:2px
+    classDef vercel fill:#000,stroke:#000,color:#fff
+    classDef render fill:#46e3b7,stroke:#0d9488,color:#0f172a
+    classDef supabase fill:#3ecf8e,stroke:#1e8e5b,color:#0f172a
+    classDef module fill:#e0e7ff,stroke:#4f46e5,color:#1e1b4b
+    classDef table fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef guard fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
